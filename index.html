@@ -1005,7 +1005,7 @@
                 for (let v of verticalGroups) {
                     const intersection = h.xs.filter(x => v.ys.includes(x));
                     if (intersection.length > 0) {
-                        return { type: 'wrapped', x: intersection[0], y: v.ys.find(y => h.xs.includes(x)) };
+                        return { type: 'wrapped', x: intersection[0], y: v.ys.find(y => h.xs.includes(y)) };
                     }
                 }
             }
