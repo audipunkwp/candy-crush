@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Crystal Crush</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --pink: #ff6b9d;
+            --purple: #9b59b6;
+            --blue: #3498db;
+            --gold: #f1c40f;
+            --red: #e74c3c;
+            --orange: #e67e22;
+            --green: #2ecc71;
+            --cyan: #1abc9c;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 800px;
+            background: linear-gradient(180deg, #2a1a4a 0%, #1a0a2e 100%);
+            overflow: hidden;
+        }
+        
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+        
+        /* Main Menu */
+        #main-menu {
+            background: linear-gradient(180deg, #ff6b9d 0%, #9b59b6 50%, #3498db 100%);
+        }
+        
+        .title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 48px;
+            color: #fff;
+            text-shadow: 4px 4px 0 #e74c3c, 6px 6px 10px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .logo-gems {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        
+        .logo-gem {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .logo-gem:nth-child(1) { background: linear-gradient(135deg, #e74c3c, #c0392b); animation-delay: 0s; }
+        .logo-gem:nth-child(2) { background: linear-gradient(135deg, #f1c40f, #f39c12); animation-delay: 0.2s; }
+        .logo-gem:nth-child(3) { background: linear-gradient(135deg, #2ecc71, #27ae60); animation-delay: 0.4s; }
+        .logo-gem:nth-child(4) { background: linear-gradient(135deg, #3498db, #2980b9); animation-delay: 0.6s; }
+        .logo-gem:nth-child(5) { background: linear-gradient(135deg, #9b59b6, #8e44ad); animation-delay: 0.8s; }
+        .logo-gem:nth-child(6) { background: linear-gradient(135deg, #e67e22, #d35400); animation-delay: 1s; }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .menu-btn {
+            width: 220px;
+            padding: 18px 30px;
+            margin: 10px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 22px;
+            color: #fff;
+            background: linear-gradient(180deg, #ff8fab 0%, #ff6b9d 50%, #e84a7f 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #c0392b, 0 15px 20px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 11px 0 #c0392b, 0 20px 25px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #c0392b, 0 8px 10px rgba(0,0,0,0.3);
+        }
+        
+        .coins-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+        
+        .coin-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .coin-amount {
+            font-family: 'Fredoka One', cursive;
+            color: #f1c40f;
+            font-size: 18px;
+        }
+        
+        /* Level Select */
+        #level-select {
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            padding: 20px;
+            justify-content: flex-start;
+            padding-top: 60px;
+        }
+        
+        .level-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 0 #e74c3c;
+        }
+        
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            max-width: 350px;
+        }
+        
+        .level-btn {
+            width: 55px;
+            height: 65px;
+            background: linear-gradient(180deg, #5d6d7e 0%, #34495e 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 #1a252f, 0 6px 10px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            position: relative;
+        }
+        
+        .level-btn.locked {
+            background: linear-gradient(180deg, #7f8c8d 0%, #5d6d7e 100%);
+            opacity: 0.6;
+        }
+        
+        .level-btn:not(.locked):hover {
+            transform: translateY(-2px);
+        }
+        
+        .level-btn:not(.locked):active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1a252f;
+        }
+        
+        .level-num {
+            font-family: 'Fredoka One', cursive;
+            font-size: 20px;
+            color: #fff;
+        }
+        
+        .level-stars {
+            display: flex;
+            gap: 2px;
+            margin-top: 4px;
+        }
+        
+        .star {
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+        
+        .star.filled {
+            color: #f1c40f;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(180deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 #922b21;
+            z-index: 100;
+        }
+        
+        .back-btn::after {
+            content: '←';
+            color: #fff;
+            font-size: 24px;
+        }
+        
+        /* Game Screen */
+        #game-screen {
+            background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 100%);
+        }
+        
+        .game-header {
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .moves-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .moves-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .moves-count {
+            font-family: 'Fredoka One', cursive;
+            font-size: 24px;
+            color: #fff;
+        }
+        
+        .score-display {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-size: 12px;
+            color: #ccc;
+            text-transform: uppercase;
+        }
+        
+        .score-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 28px;
+            color: #f1c40f;
+        }
+        
+        .target-display {
+            text-align: right;
+        }
+        
+        .target-label {
+            font-size: 12px;
+            color: #ccc;
+            text-transform: uppercase;
+        }
+        
+        .target-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 20px;
+            color: #2ecc71;
+        }
+        
+        #game-canvas {
+            margin-top: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 50px rgba(255,255,255,0.05);
+        }
+        
+        .boosters-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .booster-btn {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(180deg, #5d6d7e 0%, #34495e 100%);
+            border: 3px solid #7f8c8d;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 24px;
+            position: relative;
+        }
+        
+        .booster-btn:disabled {
+            opacity: 0.4;
+        }
+        
+        .booster-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 22px;
+            height: 22px;
+            background: #e74c3c;
+            border-radius: 50%;
+            font-size: 12px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive;
+        }
+        
+        /* Level Complete */
+        #level-complete {
+            background: rgba(26, 10, 46, 0.95);
+        }
+        
+        .complete-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 42px;
+            color: #f1c40f;
+            text-shadow: 4px 4px 0 #e67e22;
+            margin-bottom: 30px;
+            animation: celebrate 0.5s ease-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .stars-display {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .result-star {
+            width: 70px;
+            height: 70px;
+            font-size: 50px;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: starPop 0.5s ease-out forwards;
+            opacity: 0;
+            transform: scale(0) rotate(-180deg);
+        }
+        
+        .result-star.filled {
+            color: #f1c40f;
+            text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+        }
+        
+        .result-star:nth-child(1) { animation-delay: 0.3s; }
+        .result-star:nth-child(2) { animation-delay: 0.6s; }
+        .result-star:nth-child(3) { animation-delay: 0.9s; }
+        
+        @keyframes starPop {
+            0% { opacity: 0; transform: scale(0) rotate(-180deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        
+        .final-score {
+            font-family: 'Fredoka One', cursive;
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        
+        .complete-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        /* Shop */
+        #shop-screen {
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            padding: 20px;
+            justify-content: flex-start;
+            padding-top: 60px;
+        }
+        
+        .shop-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 36px;
+            color: #f1c40f;
+            margin-bottom: 30px;
+        }
+        
+        .shop-items {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 320px;
+        }
+        
+        .shop-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+        }
+        
+        .shop-item-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .shop-item-info {
+            flex: 1;
+        }
+        
+        .shop-item-name {
+            font-family: 'Fredoka One', cursive;
+            color: #fff;
+            font-size: 18px;
+        }
+        
+        .shop-item-desc {
+            color: #ccc;
+            font-size: 12px;
+        }
+        
+        .shop-buy-btn {
+            padding: 10px 20px;
+            background: linear-gradient(180deg, #2ecc71, #27ae60);
+            border: none;
+            border-radius: 20px;
+            color: #fff;
+            font-family: 'Fredoka One', cursive;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .shop-buy-btn:disabled {
+            background: #7f8c8d;
+        }
+        
+        /* Game Over */
+        #game-over {
+            background: rgba(26, 10, 46, 0.95);
+        }
+        
+        .game-over-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 42px;
+            color: #e74c3c;
+            text-shadow: 4px 4px 0 #c0392b;
+            margin-bottom: 30px;
+        }
+        
+        .floating-gems {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .floating-gem {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen active">
+            <div class="logo-gems">
+                <div class="logo-gem"></div>
+                <div class="logo-gem"></div>
+                <div class="logo-gem"></div>
+                <div class="logo-gem"></div>
+                <div class="logo-gem"></div>
+                <div class="logo-gem"></div>
+            </div>
+            <h1 class="title">Crystal Crush</h1>
+            <button class="menu-btn" onclick="showScreen('level-select')">Play</button>
+            <button class="menu-btn" onclick="showScreen('shop-screen')">Shop</button>
+            <div class="coins-display">
+                <div class="coin-icon"></div>
+                <span class="coin-amount" id="menu-coins">100</span>
+            </div>
+        </div>
+
+        <!-- Level Select -->
+        <div id="level-select" class="screen">
+            <button class="back-btn" onclick="showScreen('main-menu')"></button>
+            <h2 class="level-title">Select Level</h2>
+            <div class="levels-grid" id="levels-grid"></div>
+            <div class="coins-display" style="top: 15px;">
+                <div class="coin-icon"></div>
+                <span class="coin-amount" id="level-coins">100</span>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="moves-display">
+                    <div class="moves-icon">⚡</div>
+                    <span class="moves-count" id="moves-left">20</span>
+                </div>
+                <div class="score-display">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="score">0</div>
+                </div>
+                <div class="target-display">
+                    <div class="target-label">Target</div>
+                    <div class="target-value" id="target">1000</div>
+                </div>
+            </div>
+            <canvas id="game-canvas" width="315" height="315"></canvas>
+            <div class="boosters-row">
+                <button class="booster-btn" id="booster-hammer" onclick="useBooster('hammer')">🔨
+                    <span class="booster-count" id="hammer-count">0</span>
+                </button>
+                <button class="booster-btn" id="booster-color" onclick="useBooster('color')">🎨
+                    <span class="booster-count" id="color-count">0</span>
+                </button>
+                <button class="booster-btn" id="booster-striped" onclick="useBooster('striped')">⚡
+                    <span class="booster-count" id="striped-count">0</span>
+                </button>
+            </div>
+            <button class="back-btn" onclick="showScreen('level-select')" style="top: 80px;"></button>
+        </div>
+
+        <!-- Level Complete -->
+        <div id="level-complete" class="screen">
+            <h2 class="complete-title">Level Complete!</h2>
+            <div class="stars-display">
+                <div class="result-star" id="star1">⭐</div>
+                <div class="result-star" id="star2">⭐</div>
+                <div class="result-star" id="star3">⭐</div>
+            </div>
+            <div class="final-score">Score: <span id="final-score">0</span></div>
+            <div class="complete-buttons">
+                <button class="menu-btn" onclick="retryLevel()">Replay</button>
+                <button class="menu-btn" onclick="nextLevel()">Next</button>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="game-over" class="screen">
+            <h2 class="game-over-title">Game Over</h2>
+            <p style="color: #fff; font-size: 20px; margin-bottom: 20px;">Out of moves!</p>
+            <p style="color: #ccc; margin-bottom: 30px;">Final Score: <span id="final-score-over">0</span></p>
+            <div class="complete-buttons">
+                <button class="menu-btn" onclick="retryLevel()">Try Again</button>
+                <button class="menu-btn" onclick="showScreen('level-select')">Levels</button>
+            </div>
+        </div>
+
+        <!-- Shop -->
+        <div id="shop-screen" class="screen">
+            <button class="back-btn" onclick="showScreen('main-menu')"></button>
+            <h2 class="shop-title">Shop</h2>
+            <div class="shop-items">
+                <div class="shop-item">
+                    <div class="shop-item-icon">🔨</div>
+                    <div class="shop-item-info">
+                        <div class="shop-item-name">Hammer</div>
+                        <div class="shop-item-desc">Remove one gem</div>
+                    </div>
+                    <button class="shop-buy-btn" onclick="buyBooster('hammer', 50)">
+                        <div class="coin-icon" style="width: 16px; height: 16px;"></div>
+                        50
+                    </button>
+                </div>
+                <div class="shop-item">
+                    <div class="shop-item-icon">🎨</div>
+                    <div class="shop-item-info">
+                        <div class="shop-item-name">Color Bomb</div>
+                        <div class="shop-item-desc">Shuffle all gems</div>
+                    </div>
+                    <button class="shop-buy-btn" onclick="buyBooster('color', 100)">
+                        <div class="coin-icon" style="width: 16px; height: 16px;"></div>
+                        100
+                    </button>
+                </div>
+                <div class="shop-item">
+                    <div class="shop-item-icon">⚡</div>
+                    <div class="shop-item-info">
+                        <div class="shop-item-name">Striped Gem</div>
+                        <div class="shop-item-desc">Create striped gem</div>
+                    </div>
+                    <button class="shop-buy-btn" onclick="buyBooster('striped', 75)">
+                        <div class="coin-icon" style="width: 16px; height: 16px;"></div>
+                        75
+                    </button>
+                </div>
+            </div>
+            <div class="coins-display" style="top: 15px;">
+                <div class="coin-icon"></div>
+                <span class="coin-amount" id="shop-coins">100</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
+        const GRID_SIZE = 9;
+        const GEM_SIZE = 35;
+        const CANVAS_SIZE = GRID_SIZE * GEM_SIZE;
+        
+        const GEM_TYPES = [
+            { name: 'red', color: '#e74c3c', gradient: ['#e74c3c', '#c0392b'], shape: 'diamond' },
+            { name: 'yellow', color: '#f1c40f', gradient: ['#f1c40f', '#f39c12'], shape: 'square' },
+            { name: 'green', color: '#2ecc71', gradient: ['#2ecc71', '#27ae60'], shape: 'hexagon' },
+            { name: 'blue', color: '#3498db', gradient: ['#3498db', '#2980b9'], shape: 'circle' },
+            { name: 'purple', color: '#9b59b6', gradient: ['#9b59b6', '#8e44ad'], shape: 'triangle' },
+            { name: 'orange', color: '#e67e22', gradient: ['#e67e22', '#d35400'], shape: 'star' }
+        ];
+
+        const SPECIAL_TYPES = {
+            STRIPED_H: 1,
+            STRIPED_V: 2,
+            WRAPPED: 3,
+            RAINBOW: 4
+        };
+
+        // Game State
+        let grid = [];
+        let selectedGem = null;
+        let isAnimating = false;
+        let score = 0;
+        let moves = 0;
+        let target = 0;
+        let currentLevel = 1;
+        let coins = parseInt(localStorage.getItem('crystalmatch_coins')) || 100;
+        let boosters = JSON.parse(localStorage.getItem('crystalmatch_boosters')) || { hammer: 0, color: 0, striped: 0 };
+        let levelStars = JSON.parse(localStorage.getItem('crystalmatch_levels')) || {};
+        let activeBooster = null;
+        let hammerPosition = null;
+
+        // Level Configuration
+        const LEVELS = [
+            { moves: 20, target: 1000, type: 'score' },
+            { moves: 18, target: 1500, type: 'score' },
+            { moves: 20, target: 2000, type: 'score' },
+            { moves: 15, target: 2500, type: 'score' },
+            { moves: 22, target: 3000, type: 'score' },
+            { moves: 18, target: 3500, type: 'score' },
+            { moves: 20, target: 4000, type: 'score' },
+            { moves: 15, target: 4500, type: 'score' },
+            { moves: 25, target: 5000, type: 'score' },
+            { moves: 20, target: 6000, type: 'score' }
+        ];
+
+        // Canvas Setup
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Draw Gem
+        function drawGem(x, y, type, special = 0) {
+            const g = GEM_TYPES[type];
+            const px = x * GEM_SIZE + GEM_SIZE / 2;
+            const py = y * GEM_SIZE + GEM_SIZE / 2;
+            const size = GEM_SIZE / 2 - 3;
+
+            ctx.save();
+            ctx.translate(px, py);
+
+            // Gradient background
+            const grad = ctx.createRadialGradient(0, -5, 0, 0, 0, size);
+            grad.addColorStop(0, g.gradient[0]);
+            grad.addColorStop(1, g.gradient[1]);
+
+            ctx.beginPath();
+            switch(g.shape) {
+                case 'diamond':
+                    ctx.moveTo(0, -size);
+                    ctx.lineTo(size, 0);
+                    ctx.lineTo(0, size);
+                    ctx.lineTo(-size, 0);
+                    break;
+                case 'square':
+                    ctx.roundRect(-size, -size, size * 2, size * 2, 6);
+                    break;
+                case 'circle':
+                    ctx.arc(0, 0, size, 0, Math.PI * 2);
+                    break;
+                case 'hexagon':
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (Math.PI / 3) * i - Math.PI / 2;
+                        const hx = Math.cos(angle) * size;
+                        const hy = Math.sin(angle) * size;
+                        if (i === 0) ctx.moveTo(hx, hy);
+                        else ctx.lineTo(hx, hy);
+                    }
+                    break;
+                case 'triangle':
+                    ctx.moveTo(0, -size);
+                    ctx.lineTo(size, size);
+                    ctx.lineTo(-size, size);
+                    break;
+                case 'star':
+                    for (let i = 0; i < 10; i++) {
+                        const angle = (Math.PI / 5) * i - Math.PI / 2;
+                        const r = i % 2 === 0 ? size : size * 0.5;
+                        const sx = Math.cos(angle) * r;
+                        const sy = Math.sin(angle) * r;
+                        if (i === 0) ctx.moveTo(sx, sy);
+                        else ctx.lineTo(sx, sy);
+                    }
+                    break;
+            }
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Shine effect
+            ctx.beginPath();
+            ctx.arc(-size * 0.3, -size * 0.3, size * 0.2, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fill();
+
+            // Special gem indicators
+            if (special === SPECIAL_TYPES.STRIPED_H) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-size * 0.6, 0);
+                ctx.lineTo(size * 0.6, 0);
+                ctx.stroke();
+            } else if (special === SPECIAL_TYPES.STRIPED_V) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, -size * 0.6);
+                ctx.lineTo(0, size * 0.6);
+                ctx.stroke();
+            } else if (special === SPECIAL_TYPES.WRAPPED) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.7, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.4, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (special === SPECIAL_TYPES.RAINBOW) {
+                const rainbow = ctx.createLinearGradient(-size, -size, size, size);
+                rainbow.addColorStop(0, '#ff0000');
+                rainbow.addColorStop(0.17, '#ff7f00');
+                rainbow.addColorStop(0.33, '#ffff00');
+                rainbow.addColorStop(0.5, '#00ff00');
+                rainbow.addColorStop(0.67, '#0000ff');
+                rainbow.addColorStop(0.83, '#4b0082');
+                rainbow.addColorStop(1, '#9400d3');
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = rainbow;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+            }
+
+            // Selection highlight
+            if (selectedGem && selectedGem.x === x && selectedGem.y === y) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(0, 0, size + 2, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        // Initialize Grid
+        function initGrid() {
+            grid = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                grid[y] = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    let type;
+                    do {
+                        type = Math.floor(Math.random() * GEM_TYPES.length);
+                    } while (wouldMatch(x, y, type));
+                    grid[y][x] = { type, special: 0 };
+                }
+            }
+        }
+
+        // Check if placing would create match
+        function wouldMatch(x, y, type) {
+            // Check horizontal
+            if (x >= 2 && grid[y][x-1]?.type === type && grid[y][x-2]?.type === type) return true;
+            // Check vertical
+            if (y >= 2 && grid[y-1]?.[x]?.type === type && grid[y-2]?.[x]?.type === type) return true;
+            return false;
+        }
+
+        // Render
+        function render() {
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+            // Grid background
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (grid[y][x]) {
+                        drawGem(x, y, grid[y][x].type, grid[y][x].special);
+                    }
+                }
+            }
+
+            // Hammer position indicator
+            if (activeBooster === 'hammer' && hammerPosition) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.strokeRect(
+                    hammerPosition.x * GEM_SIZE + 2,
+                    hammerPosition.y * GEM_SIZE + 2,
+                    GEM_SIZE - 4,
+                    GEM_SIZE - 4
+                );
+                ctx.setLineDash([]);
+            }
+        }
+
+        // Find Matches
+        function findMatches() {
+            let matches = new Set();
+
+            // Horizontal matches
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE - 2; x++) {
+                    if (!grid[y][x]) continue;
+                    let matchLen = 1;
+                    while (x + matchLen < GRID_SIZE && grid[y][x + matchLen] && 
+                           grid[y][x + matchLen].type === grid[y][x].type) {
+                        matchLen++;
+                    }
+                    if (matchLen >= 3) {
+                        for (let i = 0; i < matchLen; i++) {
+                            matches.add(`${x + i},${y}`);
+                        }
+                    }
+                }
+            }
+
+            // Vertical matches
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE - 2; y++) {
+                    if (!grid[y][x]) continue;
+                    let matchLen = 1;
+                    while (y + matchLen < GRID_SIZE && grid[y + matchLen]?.[x] && 
+                           grid[y + matchLen][x].type === grid[y][x].type) {
+                        matchLen++;
+                    }
+                    if (matchLen >= 3) {
+                        for (let i = 0; i < matchLen; i++) {
+                            matches.add(`${x},${y + i}`);
+                        }
+                    }
+                }
+            }
+
+            return Array.from(matches).map(m => {
+                const [x, y] = m.split(',').map(Number);
+                return { x, y };
+            });
+        }
+
+        // Check for special candy creation
+        function checkSpecialCreation(matches) {
+            // Group matches by row and column
+            let horizontalGroups = [];
+            let verticalGroups = [];
+
+            // Find horizontal groups
+            for (let y = 0; y < GRID_SIZE; y++) {
+                let group = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (matches.some(m => m.x === x && m.y === y)) {
+                        group.push(x);
+                    } else if (group.length > 0) {
+                        if (group.length >= 3) horizontalGroups.push({ y, xs: [...group] });
+                        group = [];
+                    }
+                }
+                if (group.length >= 3) horizontalGroups.push({ y, xs: [...group] });
+            }
+
+            // Find vertical groups
+            for (let x = 0; x < GRID_SIZE; x++) {
+                let group = [];
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    if (matches.some(m => m.x === x && m.y === y)) {
+                        group.push(y);
+                    } else if (group.length > 0) {
+                        if (group.length >= 3) verticalGroups.push({ x, ys: [...group] });
+                        group = [];
+                    }
+                }
+                if (group.length >= 3) verticalGroups.push({ x, ys: [...group] });
+            }
+
+            // Check for L/T shapes (wrapped candy)
+            for (let h of horizontalGroups) {
+                for (let v of verticalGroups) {
+                    const intersection = h.xs.filter(x => v.ys.includes(x));
+                    if (intersection.length > 0) {
+                        return { type: 'wrapped', x: intersection[0], y: v.ys.find(y => h.xs.includes(x)) };
+                    }
+                }
+            }
+
+            // Check for 5 match (rainbow)
+            for (let h of horizontalGroups) {
+                if (h.xs.length >= 5) {
+                    return { type: 'rainbow', x: h.xs[Math.floor(h.xs.length/2)], y: h.y };
+                }
+            }
+            for (let v of verticalGroups) {
+                if (v.ys.length >= 5) {
+                    return { type: 'rainbow', x: v.x, y: v.ys[Math.floor(v.ys.length/2)] };
+                }
+            }
+
+            // Check for 4 match (striped)
+            for (let h of horizontalGroups) {
+                if (h.xs.length === 4) {
+                    return { type: 'striped', direction: 'h', x: h.xs[1], y: h.y };
+                }
+            }
+            for (let v of verticalGroups) {
+                if (v.ys.length === 4) {
+                    return { type: 'striped', direction: 'v', x: v.x, y: v.ys[1] };
+                }
+            }
+
+            return null;
+        }
+
+        // Remove matches and handle special effects
+        async function removeMatches(matches) {
+            if (matches.length === 0) return false;
+
+            // Check for special creation
+            const special = checkSpecialCreation(matches);
+
+            // Calculate score
+            const baseScore = matches.length * 10;
+            const comboMultiplier = 1 + Math.floor(score / 500) * 0.1;
+            score += Math.floor(baseScore * comboMultiplier);
+
+            // Remove matched gems and handle specials
+            for (const m of matches) {
+                const gem = grid[m.y][m.x];
+                if (!gem) continue;
+
+                // Check for rainbow candy interaction with special
+                if (gem.special === SPECIAL_TYPES.RAINBOW) {
+                    const targetType = gem.type;
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            if (grid[y][x] && grid[y][x].type === targetType && 
+                                !matches.some(m => m.x === x && m.y === y)) {
+                                matches.push({ x, y });
+                            }
+                        }
+                    }
+                }
+
+                // Handle striped candy
+                if (gem.special === SPECIAL_TYPES.STRIPED_H) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        if (!matches.some(m => m.x === x && m.y === m.y)) {
+                            matches.push({ x, y: m.y });
+                        }
+                    }
+                } else if (gem.special === SPECIAL_TYPES.STRIPED_V) {
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        if (!matches.some(m => m.x === m.x && m.y === y)) {
+                            matches.push({ x: m.x, y });
+                        }
+                    }
+                }
+
+                // Handle wrapped candy
+                if (gem.special === SPECIAL_TYPES.WRAPPED) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nx = m.x + dx;
+                            const ny = m.y + dy;
+                            if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                                if (!matches.some(pm => pm.x === nx && pm.y === ny)) {
+                                    matches.push({ x: nx, y: ny });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Remove all matched gems
+            for (const m of matches) {
+                if (grid[m.y] && grid[m.y][m.x]) {
+                    grid[m.y][m.x] = null;
+                }
+            }
+
+            // Create special candy
+            if (special) {
+                if (special.type === 'rainbow') {
+                    grid[special.y][special.x] = { type: Math.floor(Math.random() * GEM_TYPES.length), special: SPECIAL_TYPES.RAINBOW };
+                } else if (special.type === 'striped') {
+                    grid[special.y][special.x] = { type: matches[0]?.type || 0, special: special.direction === 'h' ? SPECIAL_TYPES.STRIPED_H : SPECIAL_TYPES.STRIPED_V };
+                } else if (special.type === 'wrapped') {
+                    grid[special.y][special.x] = { type: matches[0]?.type || 0, special: SPECIAL_TYPES.WRAPPED };
+                }
+            }
+
+            // Animate and drop
+            render();
+            await delay(200);
+            
+            // Drop gems
+            await dropGems();
+            
+            // Fill empty spaces
+            await fillGrid();
+            
+            // Check for cascade matches
+            const newMatches = findMatches();
+            if (newMatches.length > 0) {
+                await removeMatches(newMatches);
+            }
+
+            return true;
+        }
+
+        // Drop gems down
+        async function dropGems() {
+            let dropped = false;
+            
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = GRID_SIZE - 1; y >= 0; y--) {
+                    if (!grid[y][x]) {
+                        // Find gem above
+                        for (let y2 = y - 1; y2 >= 0; y2--) {
+                            if (grid[y2][x]) {
+                                grid[y][x] = grid[y2][x];
+                                grid[y2][x] = null;
+                                dropped = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (dropped) {
+                render();
+                await delay(150);
+            }
+        }
+
+        // Fill empty spaces
+        async function fillGrid() {
+            let filled = false;
+            
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    if (!grid[y][x]) {
+                        grid[y][x] = { 
+                            type: Math.floor(Math.random() * GEM_TYPES.length), 
+                            special: 0 
+                        };
+                        filled = true;
+                    }
+                }
+            }
+            
+            if (filled) {
+                render();
+                await delay(150);
+            }
+        }
+
+        // Delay helper
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Swap gems
+        async function swapGems(x1, y1, x2, y2) {
+            const temp = grid[y1][x1];
+            grid[y1][x1] = grid[y2][x2];
+            grid[y2][x2] = temp;
+            
+            render();
+            await delay(150);
+            
+            const matches = findMatches();
+            if (matches.length > 0) {
+                moves--;
+                updateUI();
+                await removeMatches(matches);
+                return true;
+            } else {
+                // Swap back
+                const temp = grid[y1][x1];
+                grid[y1][x1] = grid[y2][x2];
+                grid[y2][x2] = temp;
+                render();
+                return false;
+            }
+        }
+
+        // Handle click/touch
+        async function handleClick(e) {
+            if (isAnimating || moves <= 0) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = Math.floor((e.clientX - rect.left) * scaleX / GEM_SIZE);
+            const y = Math.floor((e.clientY - rect.top) * scaleY / GEM_SIZE);
+
+            if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return;
+
+            // Hammer booster
+            if (activeBooster === 'hammer') {
+                if (grid[y][x]) {
+                    grid[y][x] = null;
+                    moves--;
+                    updateUI();
+                    render();
+                    activeBooster = null;
+                    hammerPosition = null;
+                    
+                    await dropGems();
+                    await fillGrid();
+                    
+                    const matches = findMatches();
+                    if (matches.length > 0) {
+                        await removeMatches(matches);
+                    }
+                    
+                    checkGameEnd();
+                }
+                return;
+            }
+
+            // Striped booster
+            if (activeBooster === 'striped') {
+                if (grid[y][x]) {
+                    grid[y][x].special = SPECIAL_TYPES.STRIPED_H;
+                    moves--;
+                    updateUI();
+                    render();
+                    activeBooster = null;
+                    boosters.striped--;
+                    saveBoosters();
+                    updateBoosterButtons();
+                }
+                return;
+            }
+
+            // Color bomb booster
+            if (activeBooster === 'color') {
+                // Shuffle the board
+                const allGems = [];
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        if (grid[y][x]) allGems.push(grid[y][x]);
+                    }
+                }
+                
+                // Shuffle
+                for (let i = allGems.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [allGems[i], allGems[j]] = [allGems[j], allGems[i]];
+                }
+                
+                // Put back
+                let idx = 0;
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        grid[y][x] = allGems[idx++];
+                    }
+                }
+                
+                moves--;
+                updateUI();
+                render();
+                activeBooster = null;
+                boosters.color--;
+                saveBoosters();
+                updateBoosterButtons();
+                
+                await delay(200);
+                const matches = findMatches();
+                if (matches.length > 0) {
+                    await removeMatches(matches);
+                }
+                
+                checkGameEnd();
+                return;
+            }
+
+            // Normal selection
+            if (!selectedGem) {
+                selectedGem = { x, y };
+            } else {
+                const dx = Math.abs(x - selectedGem.x);
+                const dy = Math.abs(y - selectedGem.y);
+                
+                if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
+                    isAnimating = true;
+                    await swapGems(selectedGem.x, selectedGem.y, x, y);
+                    isAnimating = false;
+                    selectedGem = null;
+                    checkGameEnd();
+                } else {
+                    selectedGem = { x, y };
+                }
+            }
+            render();
+        }
+
+        function checkGameEnd() {
+            const level = LEVELS[currentLevel - 1];
+            
+            if (score >= level.target) {
+                showScreen('level-complete');
+                showResult();
+            } else if (moves <= 0) {
+                showScreen('game-over');
+                document.getElementById('final-score-over').textContent = score;
+            }
+        }
+
+        function showResult() {
+            const level = LEVELS[currentLevel - 1];
+            const stars = score >= level.target * 1.5 ? 3 : (score >= level.target ? 2 : 1);
+            
+            document.getElementById('final-score').textContent = score;
+            
+            // Save stars
+            if (!levelStars[currentLevel] || levelStars[currentLevel] < stars) {
+                levelStars[currentLevel] = stars;
+                localStorage.setItem('crystalmatch_levels', JSON.stringify(levelStars));
+            }
+
+            // Award coins
+            const coinReward = stars * 10;
+            coins += coinReward;
+            localStorage.setItem('crystalmatch_coins', coins);
+
+            setTimeout(() => {
+                document.getElementById('star1').classList.toggle('filled', stars >= 1);
+                document.getElementById('star2').classList.toggle('filled', stars >= 2);
+                document.getElementById('star3').classList.toggle('filled', stars >= 3);
+            }, 100);
+        }
+
+        // UI Functions
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            if (screenId === 'level-select') {
+                renderLevelsGrid();
+            }
+            updateCoinDisplay();
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('moves-left').textContent = moves;
+            document.getElementById('target').textContent = LEVELS[currentLevel - 1].target;
+        }
+
+        function updateCoinDisplay() {
+            document.getElementById('menu-coins').textContent = coins;
+            document.getElementById('level-coins').textContent = coins;
+            document.getElementById('shop-coins').textContent = coins;
+        }
+
+        function updateBoosterButtons() {
+            document.getElementById('hammer-count').textContent = boosters.hammer;
+            document.getElementById('color-count').textContent = boosters.color;
+            document.getElementById('striped-count').textContent = boosters.striped;
+            
+            document.getElementById('booster-hammer').disabled = boosters.hammer === 0;
+            document.getElementById('booster-color').disabled = boosters.color === 0;
+            document.getElementById('booster-striped').disabled = boosters.striped === 0;
+        }
+
+        function useBooster(type) {
+            if (boosters[type] > 0 && !activeBooster) {
+                activeBooster = type;
+                if (type === 'hammer') {
+                    hammerPosition = null;
+                }
+            }
+        }
+
+        function buyBooster(type, price) {
+            if (coins >= price) {
+                coins -= price;
+                boosters[type]++;
+                localStorage.setItem('crystalmatch_coins', coins);
+                saveBoosters();
+                updateCoinDisplay();
+                updateBoosterButtons();
+            }
+        }
+
+        function saveBoosters() {
+            localStorage.setItem('crystalmatch_boosters', JSON.stringify(boosters));
+        }
+
+        function renderLevelsGrid() {
+            const grid = document.getElementById('levels-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 1; i <= 10; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'level-btn' + (i > 1 && !levelStars[i-1] ? ' locked' : '');
+                
+                if (i > 1 && !levelStars[i-1]) {
+                    btn.innerHTML = '<span class="level-num">🔒</span>';
+                } else {
+                    const stars = levelStars[i] || 0;
+                    btn.innerHTML = `
+                        <span class="level-num">${i}</span>
+                        <div class="level-stars">
+                            <span class="star ${stars >= 1 ? 'filled' : ''}">★</span>
+                            <span class="star ${stars >= 2 ? 'filled' : ''}">★</span>
+                            <span class="star ${stars >= 3 ? 'filled' : ''}">★</span>
+                        </div>
+                    `;
+                    btn.onclick = () => startLevel(i);
+                }
+                
+                grid.appendChild(btn);
+            }
+        }
+
+        function startLevel(levelNum) {
+            currentLevel = levelNum;
+            const level = LEVELS[levelNum - 1];
+            
+            score = 0;
+            moves = level.moves;
+            target = level.target;
+            activeBooster = null;
+            hammerPosition = null;
+            
+            initGrid();
+            render();
+            updateUI();
+            updateBoosterButtons();
+            
+            // Clear previous results
+            document.getElementById('star1').classList.remove('filled');
+            document.getElementById('star2').classList.remove('filled');
+            document.getElementById('star3').classList.remove('filled');
+            
+            showScreen('game-screen');
+        }
+
+        function retryLevel() {
+            startLevel(currentLevel);
+        }
+
+        function nextLevel() {
+            if (currentLevel < 10) {
+                startLevel(currentLevel + 1);
+            } else {
+                showScreen('level-select');
+            }
+        }
+
+        // Event Listeners
+        canvas.addEventListener('click', handleClick);
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (activeBooster === 'hammer') {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = Math.floor((e.clientX - rect.left) * scaleX / GEM_SIZE);
+                const y = Math.floor((e.clientY - rect.top) * scaleY / GEM_SIZE);
+                if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                    hammerPosition = { x, y };
+                    render();
+                }
+            }
+        });
+
+        // Initialize
+        updateCoinDisplay();
+        updateBoosterButtons();
+    </script>
+</body>
+</html>
