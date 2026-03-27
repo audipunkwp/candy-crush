@@ -44,6 +44,47 @@
             overflow: hidden;
         }
         
+        /* Animated background */
+        #game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(155, 89, 182, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(255, 107, 157, 0.1) 0%, transparent 40%);
+            animation: bgFloat 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(2%, 2%) rotate(2deg); }
+            50% { transform: translate(0, 4%) rotate(0deg); }
+            75% { transform: translate(-2%, 2%) rotate(-2deg); }
+        }
+        
+        /* Score popup animation */
+        .score-popup {
+            position: absolute;
+            font-family: 'Fredoka One', cursive;
+            font-size: 24px;
+            color: #f1c40f;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+            animation: scorePop 1s ease-out forwards;
+            z-index: 100;
+        }
+        
+        @keyframes scorePop {
+            0% { transform: scale(0.5); opacity: 1; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1) translateY(-50px); opacity: 0; }
+        }
+        
         .screen {
             position: absolute;
             top: 0;
@@ -119,6 +160,16 @@
             transition: all 0.1s;
             position: relative;
             overflow: hidden;
+        }
+        
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 11px 0 #c0392b, 0 20px 25px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #c0392b, 0 8px 10px rgba(0,0,0,0.3);
         }
         
         .menu-btn::before {
@@ -423,7 +474,13 @@
         
         .result-star.filled {
             color: #f1c40f;
-            text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+            text-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 0 40px rgba(241, 196, 15, 0.3);
+            animation: starPop 0.5s ease-out forwards, starGlow 1s ease-in-out infinite 0.5s;
+        }
+        
+        @keyframes starGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
         }
         
         .result-star:nth-child(1) { animation-delay: 0.3s; }
@@ -703,7 +760,9 @@
             { name: 'green', color: '#2ecc71', gradient: ['#2ecc71', '#27ae60'], shape: 'hexagon' },
             { name: 'blue', color: '#3498db', gradient: ['#3498db', '#2980b9'], shape: 'circle' },
             { name: 'purple', color: '#9b59b6', gradient: ['#9b59b6', '#8e44ad'], shape: 'triangle' },
-            { name: 'orange', color: '#e67e22', gradient: ['#e67e22', '#d35400'], shape: 'star' }
+            { name: 'orange', color: '#e67e22', gradient: ['#e67e22', '#d35400'], shape: 'star' },
+            { name: 'cyan', color: '#1abc9c', gradient: ['#1abc9c', '#16a085'], shape: 'diamond' },
+            { name: 'pink', color: '#ff6b9d', gradient: ['#ff6b9d', '#e84a7f'], shape: 'circle' }
         ];
 
         const SPECIAL_TYPES = {
@@ -726,6 +785,65 @@
         let levelStars = JSON.parse(localStorage.getItem('crystalmatch_levels')) || {};
         let activeBooster = null;
         let hammerPosition = null;
+        let particles = [];
+        let screenShake = { x: 0, y: 0, intensity: 0 };
+        let animatingGems = {};
+
+        // Particle System
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 / 8) * i;
+                const speed = 2 + Math.random() * 3;
+                particles.push({
+                    x: x * GEM_SIZE + GEM_SIZE / 2,
+                    y: y * GEM_SIZE + GEM_SIZE / 2,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1,
+                    color: color,
+                    size: 4 + Math.random() * 4
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2;
+                p.life -= 0.03;
+                p.size *= 0.95;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function drawParticles() {
+            for (const p of particles) {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function triggerScreenShake(intensity) {
+            screenShake.intensity = intensity;
+        }
+
+        function updateScreenShake() {
+            if (screenShake.intensity > 0) {
+                screenShake.x = (Math.random() - 0.5) * screenShake.intensity;
+                screenShake.y = (Math.random() - 0.5) * screenShake.intensity;
+                screenShake.intensity *= 0.9;
+                if (screenShake.intensity < 0.5) screenShake.intensity = 0;
+            } else {
+                screenShake.x = 0;
+                screenShake.y = 0;
+            }
+        }
 
         // Level Configuration
         const LEVELS = [
@@ -746,13 +864,20 @@
         const ctx = canvas.getContext('2d');
 
         // Draw Gem
-        function drawGem(x, y, type, special = 0) {
+        function drawGem(x, y, type, special = 0, anim = null) {
             const g = GEM_TYPES[type];
             const px = x * GEM_SIZE + GEM_SIZE / 2;
             const py = y * GEM_SIZE + GEM_SIZE / 2;
-            const size = GEM_SIZE / 2 - 3;
+            const size = (GEM_SIZE / 2 - 3) * (anim?.scale || 1);
 
             ctx.save();
+            ctx.translate(px + (anim?.offsetX || 0), py + (anim?.offsetY || 0));
+            
+            if (anim?.scale) {
+                ctx.scale(anim.scale, anim.scale);
+            }
+            
+            ctx.globalAlpha = anim?.alpha || 1;
             ctx.translate(px, py);
 
             // Gradient background
@@ -855,6 +980,18 @@
                 ctx.fill();
             }
 
+            // Glow effect for special gems
+            if (special > 0) {
+                ctx.shadowColor = special === SPECIAL_TYPES.RAINBOW ? '#fff' : g.gradient[0];
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.8, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
             // Selection highlight
             if (selectedGem && selectedGem.x === x && selectedGem.y === y) {
                 ctx.strokeStyle = '#fff';
@@ -893,19 +1030,41 @@
 
         // Render
         function render() {
+            updateParticles();
+            updateScreenShake();
+            
             ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            
+            ctx.save();
+            ctx.translate(screenShake.x, screenShake.y);
 
-            // Grid background
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            // Grid background with gradient
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_SIZE);
+            bgGrad.addColorStop(0, 'rgba(0,0,0,0.4)');
+            bgGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(-10, -10, CANVAS_SIZE + 20, CANVAS_SIZE + 20);
 
+            // Grid cells
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    ctx.fillStyle = ((x + y) % 2 === 0) ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)';
+                    ctx.fillRect(x * GEM_SIZE, y * GEM_SIZE, GEM_SIZE, GEM_SIZE);
+                }
+            }
+
+            // Draw gems with animations
             for (let y = 0; y < GRID_SIZE; y++) {
                 for (let x = 0; x < GRID_SIZE; x++) {
                     if (grid[y][x]) {
-                        drawGem(x, y, grid[y][x].type, grid[y][x].special);
+                        const anim = animatingGems[`${x},${y}`];
+                        drawGem(x, y, grid[y][x].type, grid[y][x].special, anim);
                     }
                 }
             }
+
+            // Draw particles
+            drawParticles();
 
             // Hammer position indicator
             if (activeBooster === 'hammer' && hammerPosition) {
@@ -920,6 +1079,8 @@
                 );
                 ctx.setLineDash([]);
             }
+            
+            ctx.restore();
         }
 
         // Find Matches
@@ -1047,7 +1208,15 @@
             // Calculate score
             const baseScore = matches.length * 10;
             const comboMultiplier = 1 + Math.floor(score / 500) * 0.1;
-            score += Math.floor(baseScore * comboMultiplier);
+            const points = Math.floor(baseScore * comboMultiplier);
+            score += points;
+            
+            // Show score popup at center of matches
+            if (matches.length > 0) {
+                const midX = matches.reduce((sum, m) => sum + m.x, 0) / matches.length;
+                const midY = matches.reduce((sum, m) => sum + m.y, 0) / matches.length;
+                showScorePopup(midX, midY, points);
+            }
 
             // Remove matched gems and handle specials
             for (const m of matches) {
@@ -1098,6 +1267,40 @@
                 }
             }
 
+            // Create pop animation for matched gems
+            for (const m of matches) {
+                if (grid[m.y] && grid[m.y][m.x]) {
+                    const gem = grid[m.y][m.x];
+                    const g = GEM_TYPES[gem.type];
+                    createParticles(m.x, m.y, g.gradient[0]);
+                    animatingGems[`${m.x},${m.y}`] = { scale: 1.3, alpha: 1, offsetX: 0, offsetY: 0 };
+                }
+            }
+            
+            // Screen shake for big matches
+            if (matches.length >= 5) {
+                triggerScreenShake(matches.length * 0.8);
+            }
+            
+            render();
+            await delay(150);
+            
+            // Animate scale down
+            for (let i = 0; i < 5; i++) {
+                for (const m of matches) {
+                    const key = `${m.x},${m.y}`;
+                    if (animatingGems[key]) {
+                        animatingGems[key].scale *= 0.7;
+                        animatingGems[key].alpha *= 0.7;
+                    }
+                }
+                render();
+                await delay(30);
+            }
+            
+            // Clear animations
+            animatingGems = {};
+
             // Remove all matched gems
             for (const m of matches) {
                 if (grid[m.y] && grid[m.y][m.x]) {
@@ -1139,14 +1342,19 @@
         async function dropGems() {
             let dropped = false;
             
+            // Track falling gems for animation
+            const fallingGems = [];
+            
             for (let x = 0; x < GRID_SIZE; x++) {
                 for (let y = GRID_SIZE - 1; y >= 0; y--) {
                     if (!grid[y][x]) {
                         // Find gem above
                         for (let y2 = y - 1; y2 >= 0; y2--) {
                             if (grid[y2][x]) {
+                                const dist = y - y2;
                                 grid[y][x] = grid[y2][x];
                                 grid[y2][x] = null;
+                                fallingGems.push({ x, fromY: y2, toY: y });
                                 dropped = true;
                                 break;
                             }
@@ -1156,8 +1364,25 @@
             }
             
             if (dropped) {
+                // Animate falling
+                for (let step = 0; step < 10; step++) {
+                    for (const fg of fallingGems) {
+                        const progress = step / 10;
+                        const currentY = fg.fromY + (fg.toY - fg.fromY) * progress;
+                        const offset = Math.sin(progress * Math.PI) * -10;
+                        animatingGems[`${fg.x},${fg.toY}`] = { 
+                            scale: 1, 
+                            alpha: 1, 
+                            offsetX: 0, 
+                            offsetY: offset 
+                        };
+                    }
+                    render();
+                    await delay(25);
+                }
+                animatingGems = {};
                 render();
-                await delay(150);
+                await delay(50);
             }
         }
 
@@ -1172,14 +1397,30 @@
                             type: Math.floor(Math.random() * GEM_TYPES.length), 
                             special: 0 
                         };
+                        animatingGems[`${x},${y}`] = { scale: 0, alpha: 1, offsetX: 0, offsetY: -50 };
                         filled = true;
                     }
                 }
             }
             
             if (filled) {
+                // Animate spawn
+                for (let step = 0; step < 10; step++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        for (let y = 0; y < GRID_SIZE; y++) {
+                            const key = `${x},${y}`;
+                            if (animatingGems[key]) {
+                                animatingGems[key].scale = step / 10;
+                                animatingGems[key].offsetY = -50 * (1 - step / 10);
+                            }
+                        }
+                    }
+                    render();
+                    await delay(30);
+                }
+                animatingGems = {};
                 render();
-                await delay(150);
+                await delay(50);
             }
         }
 
@@ -1190,12 +1431,30 @@
 
         // Swap gems
         async function swapGems(x1, y1, x2, y2) {
+            // Animate swap
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            
+            for (let step = 0; step < 8; step++) {
+                const progress = step / 8;
+                const offsetX = dx * GEM_SIZE * progress;
+                const offsetY = dy * GEM_SIZE * progress;
+                
+                animatingGems[`${x1},${y1}`] = { scale: 1, alpha: 1, offsetX, offsetY: -offsetY };
+                animatingGems[`${x2},${y2}`] = { scale: 1, alpha: 1, offsetX: -offsetX, offsetY };
+                
+                render();
+                await delay(30);
+            }
+            
+            animatingGems = {};
+            
             const temp = grid[y1][x1];
             grid[y1][x1] = grid[y2][x2];
             grid[y2][x2] = temp;
             
             render();
-            await delay(150);
+            await delay(100);
             
             const matches = findMatches();
             if (matches.length > 0) {
@@ -1204,6 +1463,21 @@
                 await removeMatches(matches);
                 return true;
             } else {
+                // Animate swap back
+                for (let step = 0; step < 8; step++) {
+                    const progress = step / 8;
+                    const offsetX = dx * GEM_SIZE * (1 - progress);
+                    const offsetY = dy * GEM_SIZE * (1 - progress);
+                    
+                    animatingGems[`${x1},${y1}`] = { scale: 1, alpha: 1, offsetX, offsetY: -offsetY };
+                    animatingGems[`${x2},${y2}`] = { scale: 1, alpha: 1, offsetX: -offsetX, offsetY };
+                    
+                    render();
+                    await delay(30);
+                }
+                
+                animatingGems = {};
+                
                 // Swap back
                 const temp = grid[y1][x1];
                 grid[y1][x1] = grid[y2][x2];
@@ -1376,6 +1650,19 @@
             document.getElementById('score').textContent = score;
             document.getElementById('moves-left').textContent = moves;
             document.getElementById('target').textContent = LEVELS[currentLevel - 1].target;
+        }
+
+        function showScorePopup(x, y, points) {
+            const canvas = document.getElementById('game-canvas');
+            const rect = canvas.getBoundingClientRect();
+            const container = document.getElementById('game-container');
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = '+' + points;
+            popup.style.left = (rect.left + x * GEM_SIZE + GEM_SIZE / 2) + 'px';
+            popup.style.top = (rect.top + y * GEM_SIZE) + 'px';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
         }
 
         function updateCoinDisplay() {
