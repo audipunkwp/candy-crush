@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crystal Crush</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -35,8 +35,8 @@
         }
         
         #game-container {
-            position: relative;
-            width: 100%;
+            position: absolute;
+            width: 100%; 
             max-width: 450px;
             height: 100vh;
             max-height: 800px;
@@ -209,6 +209,10 @@
             padding: 8px 16px;
             border-radius: 20px;
         }
+
+        .coins-display.level-select-coins {
+            top: 15px;
+        }
         
         .coin-icon {
             width: 24px;
@@ -375,7 +379,7 @@
         }
         
         .target-display {
-            text-align: right;
+            text-align: center;
         }
         
         .target-label {
@@ -411,6 +415,10 @@
             cursor: pointer;
             font-size: 24px;
             position: relative;
+        }
+        
+        #back-btn {
+            top: 80px;
         }
         
         .booster-btn:disabled {
@@ -577,6 +585,11 @@
         .shop-buy-btn:disabled {
             background: #7f8c8d;
         }
+
+        .coin-icon-small {
+            width: 16px;
+            height: 16px;
+        }
         
         /* Game Over */
         #game-over {
@@ -611,6 +624,17 @@
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
         }
+
+        .game-over-message {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .game-over-subtitle {
+            color: #ccc;
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
@@ -639,7 +663,7 @@
             <button class="back-btn" onclick="showScreen('main-menu')"></button>
             <h2 class="level-title">Select Level</h2>
             <div class="levels-grid" id="levels-grid"></div>
-            <div class="coins-display" style="top: 15px;">
+            <div class="coins-display level-select-coins">
                 <div class="coin-icon"></div>
                 <span class="coin-amount" id="level-coins">100</span>
             </div>
@@ -661,7 +685,7 @@
                     <div class="target-value" id="target">1000</div>
                 </div>
             </div>
-            <canvas id="game-canvas" width="315" height="315"></canvas>
+            <canvas id="game-canvas" width="400" height="400"></canvas>
             <div class="boosters-row">
                 <button class="booster-btn" id="booster-hammer" onclick="useBooster('hammer')">🔨
                     <span class="booster-count" id="hammer-count">0</span>
@@ -673,7 +697,7 @@
                     <span class="booster-count" id="striped-count">0</span>
                 </button>
             </div>
-            <button class="back-btn" onclick="showScreen('level-select')" style="top: 80px;"></button>
+            <button class="booster-btn" id="back-btn" onclick="showScreen('level-select')"></button>
         </div>
 
         <!-- Level Complete -->
@@ -694,8 +718,8 @@
         <!-- Game Over -->
         <div id="game-over" class="screen">
             <h2 class="game-over-title">Game Over</h2>
-            <p style="color: #fff; font-size: 20px; margin-bottom: 20px;">Out of moves!</p>
-            <p style="color: #ccc; margin-bottom: 30px;">Final Score: <span id="final-score-over">0</span></p>
+            <p class="game-over-message">Out of moves!</p>
+            <p class="game-over-subtitle">Final Score: <span id="final-score-over">0</span></p>
             <div class="complete-buttons">
                 <button class="menu-btn" onclick="retryLevel()">Try Again</button>
                 <button class="menu-btn" onclick="showScreen('level-select')">Levels</button>
@@ -714,7 +738,7 @@
                         <div class="shop-item-desc">Remove one gem</div>
                     </div>
                     <button class="shop-buy-btn" onclick="buyBooster('hammer', 50)">
-                        <div class="coin-icon" style="width: 16px; height: 16px;"></div>
+                        <div class="coin-icon coin-icon-small"></div>
                         50
                     </button>
                 </div>
@@ -725,7 +749,7 @@
                         <div class="shop-item-desc">Shuffle all gems</div>
                     </div>
                     <button class="shop-buy-btn" onclick="buyBooster('color', 100)">
-                        <div class="coin-icon" style="width: 16px; height: 16px;"></div>
+                        <div class="coin-icon coin-icon-small"></div>
                         100
                     </button>
                 </div>
@@ -736,12 +760,12 @@
                         <div class="shop-item-desc">Create striped gem</div>
                     </div>
                     <button class="shop-buy-btn" onclick="buyBooster('striped', 75)">
-                        <div class="coin-icon" style="width: 16px; height: 16px;"></div>
+                        <div class="coin-icon coin-icon-small"></div>
                         75
                     </button>
                 </div>
             </div>
-            <div class="coins-display" style="top: 15px;">
+            <div class="coins-display level-select-coins">
                 <div class="coin-icon"></div>
                 <span class="coin-amount" id="shop-coins">100</span>
             </div>
