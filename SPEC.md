@@ -11,11 +11,13 @@
 ## 2. Visual & Rendering Specification
 
 ### Scene Setup
+
 - **Camera:** Orthographic 2D camera, fixed top-down view
 - **Background:** Animated gradient with floating candy motifs
 - **Grid:** 9x9 game board with subtle grid lines
 
 ### Materials & Effects
+
 - **Rocks:** 6 basic types (Red Ruby, Orange Amber, Yellow Topaz, Green Emerald, Blue Sapphire, Purple Amethyst)
 - **Special Rocks:**
   - Striped (4-match): Clears row/column
@@ -25,6 +27,7 @@
 - **UI:** Candy-style fonts, bubble buttons, smooth animations
 
 ### Color Palette
+
 - Primary: Vibrant candy colors
 - Background: Soft pink to purple gradient
 - UI: White with colored accents
@@ -34,6 +37,7 @@
 ## 3. Game Mechanics Specification
 
 ### Core Gameplay
+
 - **Grid Size:** 9x9 tiles
 - **Matching:** Swap adjacent rocks to match 3+ in row/column
 - **Cascading:** Rocks fall after matches, new rocks spawn from top
@@ -44,6 +48,7 @@
   - L/T-shape: 150 points + Wrapped rock
 
 ### Level System
+
 - **Target Types:**
   - Reach score target
   - Clear specific rock count
@@ -52,6 +57,7 @@
 - **Star System:** 1-3 stars based on score
 
 ### Boosters (from shop)
+
 - Hammer: Removes one rock
 - Color Bomb: Changes rock colors
 - Striped Rock: Creates striped rock
@@ -61,10 +67,12 @@
 ## 4. Interaction Specification
 
 ### Controls
+
 - **Touch/Drag:** Swap candies by dragging
 - **Tap:** Select booster, activate power-ups
 
 ### UI Elements
+
 - **Main Menu:** Play button, Settings, Shop
 - **Level Select:** Grid of levels with stars
 - **In-Game:** Score, Moves remaining, Target display
@@ -82,9 +90,11 @@
 ## 6. Technical Architecture
 
 ### Game Engine
+
 - Unity-based architecture (simulated in HTML5/Canvas for web)
 
 ### Data Persistence
+
 - **PlayerPrefs:** Level progress, coins, unlocked boosters
 - **JSON:** Level configurations
 
