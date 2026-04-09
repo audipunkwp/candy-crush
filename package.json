@@ -1,0 +1,20 @@
+{
+  "name": "crystal-crush",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/audipunkwp/candy-crush#readme",
+  "bugs": {
+    "url": "https://github.com/audipunkwp/candy-crush/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/audipunkwp/candy-crush.git"
+  },
+  "license": "ISC",
+  "author": "Muneer Abrahams",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
